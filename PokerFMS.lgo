@@ -1,0 +1,142 @@
+to poker
+ct
+pr [Dave's Poker!]
+pr []
+localmake "first.hand fill.hand [] deal.card
+(pr [The first hand is] :first.hand)
+(pr [You got] pokerhand :first.hand)
+pr []
+localmake "second.hand fill.2nd.hand :first.hand [] deal.card
+(pr [The second hand is] :second.hand)
+(pr [They got] pokerhand :second.hand)
+pr []
+pr compare.hands :first.hand :second.hand
+end
+
+to deal.card
+op (word item sum random 13 1 :perm.ranks item sum random 4 1 :perm.suits) 
+end
+
+to fill.hand :hand :card
+if equalp count :hand 5 [op :hand]
+ifelse memberp :card :hand [op fill.hand :hand deal.card] ~
+                        [op fill.hand lput :card :hand deal.card]
+end
+
+to fill.2nd.hand :first.hand :hand :card
+if equalp count :hand 5 [op :hand]
+ifelse or memberp :card :first.hand memberp :card :hand [op fill.2nd.hand :first.hand :hand deal.card] ~
+                        [op fill.2nd.hand :first.hand lput :card :hand deal.card]
+end
+
+to compare.hands :first.hand :second.hand
+if equalp winning.handp :first.hand :second.hand "equal [op [The rank of your hands are equal!]]
+ifelse winning.handp :first.hand :second.hand [op [You win! Your hand rank is higher!]] ~
+                                         [op [Sorry! You lose! Your hand rank is lower!]]
+end
+
+to winning.handp :first.hand :second.hand
+if lessp find.index pokerhand :first.hand :hand.ranks ~
+           find.index pokerhand :second.hand :hand.ranks [op "true]
+if greaterp find.index pokerhand :first.hand :hand.ranks ~
+           find.index pokerhand :second.hand :hand.ranks [op "false]
+op "equal
+end
+
+to pokerhand :cards
+local [ranks suits rankarray]
+poker.init :cards
+if fourp [op [four of a kind]]
+if full.housep [op [full house]]
+if threep [op [three of a kind]]
+;if pairp [op ifelse equalp paircount 1 [sentence [pair of] plural first locate 2 1] [[two pairs]]]
+if pairp [op ifelse equalp paircount 1 [[one pair]] [[two pairs]]]
+if ace.highp [op ifelse flushp [[royal flush]] [[straight]]]
+if straightp [op ifelse flushp [[straight flush]] [[straight]]]
+if flushp [op [flush]]
+op [nothing!]
+end
+
+to poker.init :cards
+make "ranks map [ranknum butlast ?] :cards
+make "suits remdup map "last :cards
+make "rankarray {0 0 0 0 0 0 0 0 0 0 0 0 0}
+foreach :ranks [setitem ? :rankarray (item ? :rankarray)+1]
+end
+
+to fourp
+op memberp 4 :rankarray
+end
+
+to threep
+op memberp 3 :rankarray
+end
+
+to pairp
+op memberp 2 :rankarray
+end
+
+to full.housep
+op and threep pairp
+end
+
+to flushp
+op emptyp butfirst :suits
+end
+
+to straightp
+op nogap (reduce "min :ranks) 5
+end
+
+to nogap :smallest :howmany
+if equalp :howmany 0 [op "true]
+if not equalp (item :smallest :rankarray) 1 [op "false]
+op nogap :smallest + 1 :howmany - 1
+end
+
+to ace.highp
+if not equalp (item 1 :rankarray) 1 [op "false]
+op nogap 10 4
+end
+
+to paircount
+op count locate 2 1
+end
+
+to ranknum :rank
+if :rank = "a [op 1]
+if :rank = "j [op 11]
+if :rank = "q [op 12]
+if :rank = "k [op 13]
+op :rank
+end
+
+to locate :number :index
+if :index > 13 [op []]
+if equalp (item :index :rankarray) :number ~
+   [op fput :index (locate :number :index + 1)]
+op locate :number :index + 1   
+end
+
+to find.index :item :list
+op find.index.item :item 0 :list
+end
+
+to find.index.item :item :index :list
+if equalp :item first :list [op (:index + 1)]
+op find.index.item :item (:index + 1) bf :list
+end
+
+to min :a :b
+op ifelse :a < :b [:a] [:b]
+end
+
+;to plural :rank
+;op item :rank [aces twos threes fours fives sixes sevens eights nines ~
+;              tens jacks queens kings]
+;end
+
+make "hand.ranks [[royal flush] [straight flush] [four of a kind] [full house] ~
+                [flush] [straight] [three of a kind] [two pairs] [one pair] [nothing!]]
+make "perm.ranks [a 2 3 4 5 6 7 8 9 10 j q k]
+make "perm.suits [c s d h]
