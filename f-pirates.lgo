@@ -1,0 +1,47 @@
+to play.game :pirates
+messagebox [The Perfectly Precise Pirate Prognosticator!] [Please think of any pirate, past or present! Hit OK when you are ready!]
+Make "newpirates guess.person.with.questions :pirates
+ifelse equalp :newpirates :pirates ~
+           [messagebox [The Perfectly Precise Pirate Prognosticator!] [I guess I know every pirate in the world!]] ~
+		   [messagebox [The Perfectly Precise Pirate Prognosticator!] [Thank you for teaching me about a new hooligan of the high seas!]]
+end
+
+to guess.person.with.questions :list
+if equalp count :list 1 [op ask.final.guess :list]
+ifelse equalp ask.question :list "true ~
+                 [op setitem.list 2 :list guess.person.with.questions item 2 :list] ~
+                 [op setitem.list 3 :list guess.person.with.questions item 3 :list]
+end
+
+to ask.final.guess :list
+ifelse ask.question :list ~
+          [messagebox [The Perfectly Precise Pirate Prognosticator!] [I knew it! I know all about pirates! Thank you for playing my game!] ~
+		  op :list] ~
+          [ messagebox [The Perfectly Precise Pirate Prognosticator!] [Please help me learn about this new devil of the deep!] ~
+		   op get.new.person.difference first :list]
+end
+
+to ask.question :list
+op yesnobox [] (sentence [Is this scurvy dog] first :list [?])
+end
+
+to question :person1 :person2
+output (sentence [Tell me something that the dread pirate] :person2 [is, that the scurvy dog] :person1 [is not.])
+end
+
+to get.new.person
+output questionbox [A new pirate?] [Who is the scurrilous scalawag you were thinking of?]
+end
+
+to get.new.person.difference :person1
+localmake "person2 get.new.person
+output (list questionbox [What's the difference?] question :person1 :person2 fput  :person2 [] fput :person1 [])
+end
+
+to setitem.list :index :list :value
+localmake "listarray listtoarray :list
+setitem :index :listarray :value
+op arraytolist :listarray
+end
+
+Make "pirates [[John Lennon]]
